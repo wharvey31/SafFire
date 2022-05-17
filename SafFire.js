@@ -227,10 +227,10 @@ function miropeats_d3(data) {
         // setup height
         if (d.ct == t_name) {
             var y = yscale_d(d.ct) + bed_yscale_mod(d.file) / 1.0 + 5;
-            var tri_width = bed_yscale_mod.bandwidth() / 2;
+            var tri_width = bed_yscale_mod.bandwidth() / ( 2 * stagger);
         } else {
             var y = yscale_d(d.ct) - bed_yscale_mod_query(d.file) / 1.0 - 5;
-            var tri_width = bed_yscale_mod_query.bandwidth() / 2;
+            var tri_width = bed_yscale_mod_query.bandwidth() / ( 2 * stagger );
         }
 
         const path = d3.path();

@@ -9,7 +9,7 @@ var margin = { top: 40, right: 40, bottom: 40, left: 40 };
 console.assert(margin.left === margin.right,
     { right: margin.right, left: margin.left, errorMsg: "MARGINS NOT EQUAL" });
 var scale = 1.5;
-var height = Math.round(275 * scale);
+var height = Math.round(400 * scale);
 const original_height = height;
 var added_height = 0;
 var width = Math.round(800 * scale);
@@ -23,7 +23,8 @@ var CUR_DATASET = get_url_elm("dataset");
 var targetGenome = d3.select("#targetGenome");
 var queryGenome = d3.select("#queryGenome");
 var datasetGenomes = d3.select("#datasetGenomes");
-var space_for_bed = 20.0;
+var space_for_bed = 40.0;
+var stagger = 3;
 var cur_bed9_data = {};
 var draw_bed = function (d) { }
 var draw_data = function (d) { }

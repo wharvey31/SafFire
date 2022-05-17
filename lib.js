@@ -256,11 +256,20 @@ function split_bed_blocks(s) {
     return rtn;
 }
 
+function transform_svbed(d_index, svbed) {
+    let stagger = 3;
+    if (svbed) {
+        return space_for_bed/10 * (d_index % stagger) * (-1) ** (d_index % 2) / stagger;
+    } else {
+        return 0;
+    }; 
+}
+
 // read in bed_9 data
-function create_bed9(data, bed_file, is_query) {
+function create_bed9(data, bed_file, is_query, is_svbed) {
     console.log(`creating bed data from (${is_query})` + bed_file);
 
-    tmp_bed9_data = data.map(function (d) {
+    tmp_bed9_data = data.map(function (d, index, array) {
         var temp_name = d["#ct"];
         if (is_query) {
             temp_name = "Query:" + d["#ct"];
@@ -283,7 +292,8 @@ function create_bed9(data, bed_file, is_query) {
             b_st: split_bed_blocks(d.b_st),
             b_sz: split_bed_blocks(d.b_sz),
             file: bed_file,
-            is_query: is_query
+            is_query: is_query,
+            yHeight: transform_svbed(index, is_svbed)
         };
     });
     if (is_query) {
@@ -303,7 +313,7 @@ function create_bed9(data, bed_file, is_query) {
     var keys = Object.keys(bed9_data)
         .filter(key => bed9_data[key][0].is_query == is_query);
     // make the bed rows the same height
-    for (i = 0; i < other_keys.length - keys.length + 1; i++) {
+    for (i = 0; i < other_keys.length - keys.length + 2; i++) {
         keys.push(other_keys[i]);
     }
     // make the bed yscales
@@ -343,12 +353,14 @@ function read_in_bed9_defaults() {
             `datasets/${REF}/${REF}_dupmasker_colors.bed`,
             `datasets/${REF}/${REF}_genes_small.bed`,
             `datasets/${REF}/${REF}_gaps.bed`,
-            `datasets/${REF}/CHM1_raw.bed9`,
+            `datasets/${REF}/svcalls/${QUERY}_saf.bed9`,
+            `datasets/${REF}/svcalls/${QUERY}_pav.bed9`
         ],
         query: [
             `datasets/${QUERY}/${QUERY}_dupmasker_colors.bed`,
             `datasets/${QUERY}/${QUERY}_gaps.bed`,
             `datasets/${QUERY}/${QUERY}_CenSat.bed`,
+            `datasets/${QUERY}/${QUERY}_genes_small.bed`,
         ]
     }
     for (const key in bed_files) {
@@ -356,7 +368,7 @@ function read_in_bed9_defaults() {
             console.log(`loading bed file for ${key} ${key == "query"} ${key}: ` + bed_file);
             d3.tsv(bed_file)
                 .then(function (d) {   // Handle the resolved Promise
-                    return create_bed9(d, bed_file, key == "query");
+                    return create_bed9(d, bed_file, key == "query", bed_file.includes('svcalls'));
                 })
             /*
             d3.text(bed_file, function (text) {
@@ -431,7 +443,7 @@ function uploadbed(el) {
         console.log("upload bed parse");
         console.log(data[0]);
         console.log(data[0]);
-        create_bed9(data, `${BED_COUNT}`, "uploaderquerybed" == el);
+        create_bed9(data, `${BED_COUNT}`, "uploaderquerybed" == el, false);
         BED_COUNT = BED_COUNT + 1;
     }
 };
@@ -772,6 +784,7 @@ function bed_path(path, d, div) {
         .attr("stroke", "none")
         .attr("fill", d3.rgb("rgb(" + d.color + ")"))
         .attr("opacity", 0.8)
+        .attr("transform", "translate(0," + d.yHeight + ")")
         .on('mousemove', function (event) {
             // add the tooltip
             div.transition()
@@ -799,6 +812,7 @@ function bed_path(path, d, div) {
                 .duration(0)
                 .style("opacity", 0);
         })
+
 }
 
 
